@@ -30,10 +30,3 @@ steps:
     pip install pytest pytest-azurepipelines
     pytest
   displayName: 'pytest'
-- task: ado-discord-webhook@1
-  inputs:
-    channelId: '971553240380489728'
-    webhookKey: 'X-Y7U6OgxZEmtUMWNShiu4ZbJ_fGPUE_P4Refr3UGBIS0Z1CLAcs-43pgGmCEiCT74eH'
-    name: 'Webhook'
-    messageType: 'content'
-    content: 'TestHook'
