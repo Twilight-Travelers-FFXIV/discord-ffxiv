@@ -1,9 +1,13 @@
 aiohttp==3.7.4.post0
+aiolimiter==1.0.0
 async-timeout==3.0.1
+asyncio==3.4.3
 attrs==21.4.0
 chardet==4.0.0
 discord.py==1.7.3
 idna==3.3
-multidict==6.0.2
-typing-extensions==4.2.0
+multidict==5.2.0
+pyxivapi==0.5.1
+typing-extensions==4.0.1
 yarl==1.7.2
+youtube-dl==2021.12.17
