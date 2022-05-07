@@ -1,19 +1,15 @@
 """Lodestone Interaction Module"""
-import asyncio
 import logging
-import aiohttp
-from aiohttp.helpers import CHAR
-from aiolimiter import AsyncLimiter
-import pyxivapi
-from pyxivapi.models import Filter, Sort
 import discord
-from yarl import URL
-import json
+import pyxivapi
+from aiolimiter import AsyncLimiter
 from discord.ext import commands
 
 from ..config import xivapi_token
 from ..constants import *
 from ..emotes import *
+
+logger = logging.getLogger(__name__)
 
 MAX_REQ = 20 - 3  # buffer (request per second)
 RATE_LIMIT = AsyncLimiter(MAX_REQ, 1)
@@ -27,43 +23,59 @@ class Lodestone(commands.Cog):
 
     @commands.command()
     async def lookup(self, ctx, world: str, first: str, last: str):
+        """Lookup Character on the Lodestone
+
+        Args:
+            ctx (Context): Passed automatically by discord.py
+            world (str): World the character is in
+            first (str): Char first name
+            last (str): Char last name
+
+        Returns:
+            Nothing
+        """
         # Check world if valid
-        if not "%s%s" % (world[0].upper(), world[1:].lower()) in DATA_WORLDS:
+        if not f"{world[0].upper()}{world[1:].lower()}" in DATA_WORLDS:
             await ctx.send("Invalid world")
             return
-        lodestoneCmd = {
+        lodestone_cmd = {
             "cmd": "lookup",
             "world": world.lower(),
             "forename": first,
             "surname": last,
         }
         async with ctx.typing():
-            resp, resp2 = await self._lodestone_process(ctx, lodestoneCmd)
+            resp, resp2 = await self._lodestone_process(ctx, lodestone_cmd)
 
         # Process response
-        await self._send_response(ctx, lodestoneCmd, (resp, resp2))
+        await self._send_response(ctx, lodestone_cmd, (resp, resp2))
 
     @commands.command()
-    async def lookupId(self, ctx, id):
-        lodestoneCmd = {"cmd": "lookupId", "id": id}
-        await self._lodestone_process(ctx, lodestoneCmd)
+    async def lookupId(self, ctx, char_id):
+        """Lookup char by known ID. Mostly used for debugging.
 
-    async def _lodestone_process(self, ctx, queryCmd):
-        toClose = True
+        Args:
+            ctx (Context): Passed automatically by discord.py
+            char_id (str): Lodestone ID of character.
+        """
+        lodestone_cmd = {"cmd": "lookupId", "char_id": char_id}
+        await self._lodestone_process(ctx, lodestone_cmd)
+
+    async def _lodestone_process(self, ctx, query_cmd):
+        to_close = True
         resp = ""
 
         async with RATE_LIMIT:
             client = pyxivapi.XIVAPIClient(api_key=xivapi_token())
 
-            if queryCmd["cmd"] == "lookup":
-                print("Looking up character... ")
+            if query_cmd["cmd"] == "lookup":
+                logger.info("Looking up character... ")
                 resp = await client.character_search(
-                    world=queryCmd["world"],
-                    forename=queryCmd["forename"],
-                    surname=queryCmd["surname"],
+                    world=query_cmd["world"],
+                    forename=query_cmd["forename"],
+                    surname=query_cmd["surname"],
                 )
-                # print("Received Lodestone resp:\n %s" %(resp))
-                print()
+                logger.debug("Received Lodestone resp:\n %s" % resp)
 
                 # Check if a valid character exists.
                 if resp["Pagination"]["Results"] == 0:
@@ -77,27 +89,30 @@ class Lodestone(commands.Cog):
 
                 await client.session.close()
 
-                lodestoneCmd = {"cmd": "lookupId", "id": charId}
-                resp2 = await self._lodestone_process(ctx, lodestoneCmd)
-                toClose = False
+                lodestone_cmd = {"cmd": "lookupId", "char_id": charId}
+                resp2 = await self._lodestone_process(ctx, lodestone_cmd)
+                to_close = False
                 if resp is None:
                     return ""
 
                 return resp, resp2
 
-            elif queryCmd["cmd"] == "lookupId":
-                print("Looking up character by id... ")
+            if query_cmd["cmd"] == "lookupId":
+                logger.info("Looking up character by char_id... ")
                 resp = await client.character_by_id(
-                    lodestone_id=queryCmd["id"], extended=True, include_freecompany=True
+                    lodestone_id=query_cmd["char_id"],
+                    extended=True,
+                    include_freecompany=True,
                 )
-                # print("Received Lodestone resp:\n %s" %(resp))
+                logger.debug("Received Lodestone resp:\n %s" % resp)
 
-            if toClose:
+            if to_close:
                 await client.session.close()
 
             return resp
 
-    async def _send_response(self, ctx, respCmd, resp):
+    @staticmethod
+    async def _send_response(ctx, respCmd, resp):
         classStates = {}
         if respCmd["cmd"] == "lookup":
             charInfo = resp[1]["Character"]
@@ -108,7 +123,7 @@ class Lodestone(commands.Cog):
                 "name": charInfo["Name"],
                 "activeClassName": activeClass["UnlockedState"]["Name"],
                 "activeClassLv": activeClass["Level"],
-                "id": charInfo["ID"],
+                "char_id": charInfo["ID"],
                 "nameday": charInfo["Nameday"],
                 "avatar": charInfo["Avatar"].replace("\\", ""),
                 "title": charInfo["Title"]["Name"],
@@ -127,8 +142,6 @@ class Lodestone(commands.Cog):
             charStats["activeClassName"] = charStats["activeClassName"]
 
             # Class Info
-            print("")
-
             tankClasses = []
             healerClasses = []
             meleeDpsClasses = []
@@ -138,7 +151,7 @@ class Lodestone(commands.Cog):
             gathererClasses = []
 
             for classInfo in charInfo["ClassJobs"]:
-                print(classInfo)
+                logger.debug(classInfo)
                 if classInfo["UnlockedState"]["ID"] is not None:
                     classId = classInfo["UnlockedState"]["ID"]
                 else:
@@ -155,7 +168,7 @@ class Lodestone(commands.Cog):
                     classEmote = EMOTE_ID[classId]
 
                 else:
-                    raise TypeError("Class %d not found" % (classId))
+                    raise TypeError("Class %d not found" % classId)
 
                 if classId in CHAR_CLASS_TYPE_TANK:
                     tankClasses.append((classEmote, classLv))
@@ -179,7 +192,7 @@ class Lodestone(commands.Cog):
                     gathererClasses.append((classEmote, classLv))
 
                 else:
-                    raise TypeError("Unknown class. ID = %d" % (classId))
+                    raise TypeError("Unknown class. ID = %d" % classId)
 
             tankRoleStr = ""
             healerRoleStr = ""
@@ -190,95 +203,88 @@ class Lodestone(commands.Cog):
             gathererRoleStr = ""
 
             for tankClass in tankClasses:
-                tankRoleStr += "%s  %s\n" % (tankClass[0], tankClass[1])
+                tankRoleStr += f"{tankClass[0]}  {tankClass[1]}\n"
 
             for healerClass in healerClasses:
-                healerRoleStr += "%s  %s\n" % (healerClass[0], healerClass[1])
+                healerRoleStr += f"{healerClass[0]}  {healerClass[1]}\n"
 
             for meleeDpsClass in meleeDpsClasses:
-                meleeDpsRoleStr += "%s  %s\n" % (meleeDpsClass[0], meleeDpsClass[1])
+                meleeDpsRoleStr += f"{meleeDpsClass[0]}  {meleeDpsClass[1]}\n"
 
             for rangePhyDpsClass in rangePhyDpsClasses:
-                rangePhyDpsRoleStr += "%s  %s\n" % (
-                    rangePhyDpsClass[0],
-                    rangePhyDpsClass[1],
-                )
+                rangePhyDpsRoleStr += f"{rangePhyDpsClass[0]}  {rangePhyDpsClass[1]}\n"
 
             for rangeMagDpsClass in rangeMagDpsClasses:
-                rangeMagDpsRoleStr += "%s  %s\n" % (
-                    rangeMagDpsClass[0],
-                    rangeMagDpsClass[1],
-                )
+                rangeMagDpsRoleStr += f"{rangeMagDpsClass[0]}  {rangeMagDpsClass[1]}\n"
 
             for crafterClass in crafterClasses:
-                crafterRoleStr += "%s  %s\n" % (crafterClass[0], crafterClass[1])
+                crafterRoleStr += f"{crafterClass[0]}  {crafterClass[1]}\n"
 
             for gathererClass in gathererClasses:
-                gathererRoleStr += "%s  %s\n" % (gathererClass[0], gathererClass[1])
+                gathererRoleStr += f"{gathererClass[0]}  {gathererClass[1]}\n"
 
             # Generate Embed message
-            embedVar = discord.Embed(
+            embed_var = discord.Embed(
                 title=charStats["name"], description=charStats["title"]
             )
-            embedVar.url = "%s%s" % (CHAR_LODESTONE_URL, charStats["id"])
+            embed_var.url = f"{CHAR_LODESTONE_URL}{charStats['char_id']}"
             if "grandCompId" in charStats:
-                embedVar.colour = GRAND_COMP_HEX_COLORS[charStats["grandCompID"] - 1]
+                embed_var.colour = GRAND_COMP_HEX_COLORS[charStats["grandCompID"] - 1]
 
-            embedVar.set_thumbnail(url=charStats["avatar"])
-            embedVar.add_field(
+            embed_var.set_thumbnail(url=charStats["avatar"])
+            embed_var.add_field(
                 name="Current Class",
-                value="%s Lv. %3d\n\n"
-                % (charStats["activeClassName"], charStats["activeClassLv"]),
+                value=f"{charStats['activeClassName']} Lv. {charStats['activeClassLv']:3d}\n\n",
             )
-            embedVar.add_field(
+            embed_var.add_field(
                 name="Grand Company",
-                value="%s" % (charStats["grandCompName"]),
+                value=f"{charStats['grandCompName']}",
                 inline=False,
             )
-            embedVar.add_field(
-                name="%s Tank" % (ROLES_EMOTE_ID[0]),
-                value="%s" % (tankRoleStr.replace(" ", " ")),
+            embed_var.add_field(
+                name=f"{ROLES_EMOTE_ID[0]} Tank",
+                value=f"{tankRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
-                name="%s Healer" % (ROLES_EMOTE_ID[1]),
-                value="%s" % (healerRoleStr.replace(" ", " ")),
+            embed_var.add_field(
+                name=f"{ROLES_EMOTE_ID[1]} Healer",
+                value=f"{healerRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
-                name="​",
-                value="​",
+            embed_var.add_field(
+                name="\u200B",
+                value="\u200B",
                 inline=False,
             )
-            embedVar.add_field(
-                name="%s Melee DPS" % (ROLES_EMOTE_ID[2]),
-                value="%s" % (meleeDpsRoleStr.replace(" ", " ")),
+            embed_var.add_field(
+                name=f"{ROLES_EMOTE_ID[2]} Melee DPS",
+                value=f"{meleeDpsRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
-                name="%s Ranged Phys DPS" % (ROLES_EMOTE_ID[3]),
-                value="%s" % (rangePhyDpsRoleStr.replace(" ", " ")),
+            embed_var.add_field(
+                name=f"{ROLES_EMOTE_ID[3]} Ranged Phys DPS",
+                value=f"{rangePhyDpsRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
-                name="%s Ranged Magic DPS" % (ROLES_EMOTE_ID[4]),
-                value="%s" % (rangeMagDpsRoleStr.replace(" ", " ")),
+            embed_var.add_field(
+                name=f"{ROLES_EMOTE_ID[4]} Ranged Magic DPS",
+                value=f"{rangeMagDpsRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
-                name="​",
-                value="​",
+            embed_var.add_field(
+                name="\u200B",
+                value="\u200B",
                 inline=False,
             )
-            embedVar.add_field(
+            embed_var.add_field(
                 name="Crafter",
-                value="%s" % (crafterRoleStr.replace(" ", " ")),
+                value=f"{crafterRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
-            embedVar.add_field(
+            embed_var.add_field(
                 name="Gatherer",
-                value="%s" % (gathererRoleStr.replace(" ", " ")),
+                value=f"{gathererRoleStr.replace(' ', ' ')}",
                 inline=True,
             )
 
-            await ctx.send(embed=embedVar)
+            await ctx.send(embed=embed_var)

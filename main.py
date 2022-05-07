@@ -1,7 +1,12 @@
+import logging
+import sys
+
 import discord
 from discord.ext import commands
+
 import bot
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 intents = discord.Intents.default()
 discord_bot = commands.Bot(
