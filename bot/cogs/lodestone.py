@@ -138,7 +138,7 @@ class Lodestone(commands.Cog):
             gathererClasses = []
 
             for classInfo in charInfo["ClassJobs"]:
-                # print(classInfo)
+                print(classInfo)
                 if classInfo["UnlockedState"]["ID"] is not None:
                     classId = classInfo["UnlockedState"]["ID"]
                 else:
@@ -204,7 +204,7 @@ class Lodestone(commands.Cog):
                     rangePhyDpsClass[1],
                 )
 
-            for rangeMagDpsClass in rangePhyDpsClasses:
+            for rangeMagDpsClass in rangeMagDpsClasses:
                 rangeMagDpsRoleStr += "%s  %s\n" % (
                     rangeMagDpsClass[0],
                     rangeMagDpsClass[1],
@@ -246,6 +246,11 @@ class Lodestone(commands.Cog):
                 inline=True,
             )
             embedVar.add_field(
+                name="​",
+                value="​",
+                inline=False,
+            )
+            embedVar.add_field(
                 name="%s Melee DPS" % (ROLES_EMOTE_ID[2]),
                 value="%s" % (meleeDpsRoleStr.replace(" ", " ")),
                 inline=True,
@@ -258,6 +263,11 @@ class Lodestone(commands.Cog):
             embedVar.add_field(
                 name="%s Ranged Magic DPS" % (ROLES_EMOTE_ID[4]),
                 value="%s" % (rangeMagDpsRoleStr.replace(" ", " ")),
+                inline=True,
+            )
+            embedVar.add_field(
+                name="​",
+                value="​",
                 inline=False,
             )
             embedVar.add_field(
@@ -268,7 +278,7 @@ class Lodestone(commands.Cog):
             embedVar.add_field(
                 name="Gatherer",
                 value="%s" % (gathererRoleStr.replace(" ", " ")),
-                inline=False,
+                inline=True,
             )
 
             await ctx.send(embed=embedVar)
