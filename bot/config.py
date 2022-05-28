@@ -17,9 +17,15 @@ def prefix():
 
 def bot_token():
     """Discord access token, reverts to old style config if not in environment."""
-    return os.getenv("BOT_TOKEN", configKeys.DISCORD_TOKEN)
+    if configKeys:
+        return configKeys.DISCORD_TOKEN
+    else:
+        return os.getenv("BOT_TOKEN", "")
 
 
 def xivapi_token():
     """Lodestone API token, reverts to old style config if not in environment."""
-    return os.getenv("XIVAPI_TOKEN", configKeys.FFXIV_API_KEY)
+    if configKeys:
+        return configKeys.FFXIV_API_KEY
+    else:
+        return os.getenv("XIVAPI_TOKEN", "")
