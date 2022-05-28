@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+- release
 
 resources:
 - repo: self
@@ -14,7 +14,7 @@ variables:
   imageRepository: 'twilighttravelersffxivdiscordffxiv'
   containerRegistry: 'twilighttravelers.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
+  tag: 'release'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
