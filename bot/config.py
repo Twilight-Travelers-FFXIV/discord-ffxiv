@@ -3,7 +3,11 @@ import os
 import sys
 
 sys.path.append("..")
-import configKeys
+
+try:
+    import configKeys
+except ImportError:
+    pass  # We are running from env variables!
 
 
 def prefix():
