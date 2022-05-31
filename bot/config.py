@@ -7,7 +7,7 @@ sys.path.append("..")
 try:
     import configKeys
 except ImportError:
-    pass  # We are running from env variables!
+    configKeys = None  # We are running from env variables!
 
 
 def prefix():
