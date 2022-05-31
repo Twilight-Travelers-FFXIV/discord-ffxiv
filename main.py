@@ -6,7 +6,7 @@ from discord.ext import commands
 
 import bot
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.WARN)
 
 intents = discord.Intents.default()
 discord_bot = commands.Bot(
