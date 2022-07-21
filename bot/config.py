@@ -29,3 +29,8 @@ def xivapi_token():
         return configKeys.FFXIV_API_KEY
     else:
         return os.getenv("XIVAPI_TOKEN", "")
+
+
+def schedule_channel():
+    """Channel ID for scheduled commands, reverts to bot testing channel by default."""
+    return int(os.getenv("SCHEDULE_CHANNEL", 926638377011392573))
