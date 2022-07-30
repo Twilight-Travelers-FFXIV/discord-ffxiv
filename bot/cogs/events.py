@@ -105,7 +105,11 @@ class Events(commands.Cog):
     @commands.command()
     @delete_caller
     async def event_results(self, ctx):
-        """Fetch results of most recent event"""
+        """Fetch results of most recent event
+
+        Args:
+            ctx (Context): Passed automatically by discord.py
+        """
         messages_to_check = []
 
         async for message in ctx.channel.history(limit=50):
