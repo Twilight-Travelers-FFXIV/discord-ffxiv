@@ -66,8 +66,8 @@ raid_activity_poll = {
     "allowed)\n Remember that this is not the sign-up form yet, that will be posted when voting ends, every Wednesday.",
     "after_embed": "<:hand:973233132369215568>**The FC's activity will be held on Friday, Saturday or Sunday. For now, "
     "we will only organize one activity a week. This can be upscaled to 2 per week if we see that there "
-    "is a lot of interest in FC activities.**\n Please specify your preferred day: :red_square: Friday, "
-    ":yellow_square: Saturday, :white_large_square: Sunday",
+    "is a lot of interest in FC activities.**\n\n Please specify your preferred day: \n:red_square: Friday, "
+    "\n:yellow_square: Saturday, \n:white_large_square: Sunday",
     "embeds": [
         {
             "color": 1752220,
@@ -140,19 +140,28 @@ ROLES_REACTIONS = [
     "<:ffxivRole_tank:926749126153084988>",
 ]
 
+VOICE_REACTIONS = [":mute:", ":loud_sound:"]
+
 RAID_VOTE_RESULT = """**ACTIVITY VOTE: {}** @ever----yone
-The Twilight Travelers ACTIVITY  this week will be {}
+The Twilight Travelers ACTIVITY this week will be {}
  This is the official sign-up form, so please react with the specified emoji below this post.
 
  <:ffxivRole_dps:926749125737844737> I will join as a DPS.
  <:ffxivRole_healer:926749125733679135> I will join as a Healer.
  <:ffxivRole_tank:926749126153084988> I will join as a Tank. 
- __(multiple voting is allowed)__
+ __(multiple voting is allowed)__ 
+ 
+ If you want to join the voice chat for this event, please vote with :loud_sound:; If not, please react with :mute:.
 
-__**When:**__  The farm will commence on {} at 18:00ST - 20:00ST (servertime)
+__**When:**__  The farm will commence on {} at 18:00ST - 20:00ST (servertime).
+  <:hand:973233132369215568> At {}
 __**Info:**__  Be sure to unlock all the required duties.
 __**Raid Leader:**__ <@{}>"""
 
+SIGNUP_RESULT = """**Signup results (to dm?)**
+
+{}
+"""
 
 event_types = {
     "raids": raid_activity_poll,

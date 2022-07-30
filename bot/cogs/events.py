@@ -1,6 +1,9 @@
 """Event Management"""
+from calendar import day_name
+from collections import defaultdict
 import logging
 import re
+from datetime import date, timedelta, datetime, time
 
 import emoji
 from discord import Embed, Emoji
@@ -11,7 +14,9 @@ from ..embeds import (
     day_map,
     emoji_activity_map,
     RAID_VOTE_RESULT,
+    SIGNUP_RESULT,
     ROLES_REACTIONS,
+    VOICE_REACTIONS,
 )
 from ..utils import flatten, delete_caller
 
@@ -25,6 +30,15 @@ def dc_emojize(emoji_text: str):
     if "<" in emoji_text:
         return emoji_text
     return emoji.emojize(emoji_text, use_aliases=True)
+
+
+def dc_timestamp(day: str, hours=17, minutes=00):
+    days = {name: i for i, name in enumerate(day_name)}
+    today = date.today()
+    weekday = today.weekday()
+    return datetime.combine(
+        today + timedelta(days=days[day] - weekday), time(hours, minutes)
+    ).timestamp()
 
 
 def dc_demojize(emoji_rendered: str):
@@ -120,12 +134,83 @@ class Events(commands.Cog):
         # from then, the erst are vote votes
         winning_event = _max_emoji(messages_to_check[1:])
         winning_event_name = emoji_activity_map.get(winning_event[0])
+        timestamp = int(dc_timestamp(day_map.get(winning_day[0])))
         msg = await ctx.send(
             RAID_VOTE_RESULT.format(
                 winning_event_name,
                 f"{winning_event_name} {winning_event[0]}",
                 day_map.get(winning_day[0]),
+                f"<t:{timestamp}:F> - That's <t:{timestamp}:R>",
                 ctx.message.author.id,
             )
         )
-        await self._emoji_reactions(msg, [ROLES_REACTIONS])
+        await self._emoji_reactions(
+            msg,
+            [ROLES_REACTIONS, VOICE_REACTIONS],
+        )
+
+    @commands.command()
+    @delete_caller
+    async def signup_results(self, ctx):
+        """Fetch sign up of most recent event result announcement."""
+        async for message in ctx.channel.history(limit=50):
+            if (
+                message.author == self.bot.user
+                and message.reactions
+                and "ACTIVITY" in message.content
+            ):
+                signup_message = message
+                break
+
+        logger.debug(
+            "Signup Message: %s - Content: %s", signup_message, signup_message.content
+        )
+        if not signup_message:
+            await ctx.send(":warning: No valid previous event result found.")
+            return
+
+        print(signup_message.reactions)
+
+        # Parse the day back out :D
+        day_re = re.compile(r"The farm will commence on (?P<name>.*) at")
+        winning_day = day_re.search(signup_message.content)
+        if not winning_day:
+            await ctx.send(":warning: No valid previous event result day found.")
+            return
+        winning_day = winning_day.group("name")
+
+        # Convert to lookups for reporting
+        role_to_user_reacts = defaultdict(list)
+        user_to_voice_reacts = {}
+        for r in signup_message.reactions:
+            flat_user_list = await r.users().flatten()
+            for user in flat_user_list:
+                if user == self.bot.user:
+                    continue
+                emote = dc_demojize(r.emoji)
+                if emote in ROLES_REACTIONS:
+                    role_to_user_reacts[dc_demojize(r.emoji)].append(user)
+                if emote in VOICE_REACTIONS:
+                    if user not in user_to_voice_reacts.keys():
+                        user_to_voice_reacts[user] = emote
+                    else:
+                        # User has more than 1 voice reaction - パン肉
+                        user_to_voice_reacts[user] = ":question:"
+
+        logger.debug(dict(role_to_user_reacts))
+        logger.debug(user_to_voice_reacts)
+
+        def _userformat(role):
+            users = [
+                user_to_voice_reacts.get(u, ":question:") + u.mention
+                for u in role_to_user_reacts[role]
+            ]
+            return "\n - ".join(users)
+
+        msg = await ctx.send(
+            SIGNUP_RESULT.format(
+                "\n\n".join(
+                    [f"{role}: \n - {_userformat(role)}" for role in ROLES_REACTIONS]
+                )
+            )
+        )
