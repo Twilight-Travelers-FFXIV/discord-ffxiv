@@ -23,7 +23,7 @@ SCHEDULER = None
 
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
-    "events": CronTrigger(day_of_week="sun", hour="21", minute="00", second="0"),
+    "events": CronTrigger(day_of_week="sun", hour="21", minute="20", second="0"),
     "event_results": CronTrigger(day_of_week="wed", hour="18", minute="00", second="0"),
 }
 
@@ -74,8 +74,8 @@ async def on_ready():
 
     await channel.send(
         f"The following scheduled messages are set up for this channel: \n{formatted_schedule}\n"
-        f"_This message will self-destruct in 1 minute._",
-        delete_after=60.0,
+        f"_This message will self-destruct in 10 seconds._",
+        delete_after=10.0,
     )
     logger.info("Scheduler initiated!")
 
@@ -93,7 +93,8 @@ async def on_disconnect():
     """Called when the client has disconnected from Discord."""
     logger.debug("Disconnected from Discord! Flushing jobs...")
     for job in SCHEDULER.get_jobs():
-        job.remove()
+        #job.remove()
+        pass
 
 
 if __name__ == "__main__":
