@@ -60,7 +60,7 @@ day_map = {
 
 raid_activity_poll = {
     "before_embed": "<:ffxivautoleft:973233131811377232> **TWILIGHT TRAVELERS RAID ACTIVITY VOTING POLL** "
-    "<:ffxivautoright:973233131849130004> <:fffxivmapfight:973233131480035389> @every_____one\n"
+    "<:ffxivautoright:973233131849130004> <:fffxivmapfight:973233131480035389> @everyone\n"
     "This VOTE is open for all our FC-members to choose their preference for the next FC-Raid/Trial activity.\n"
     "You can vote for your desired activity by clicking on one of the below emoji's to vote. (multiple voting is "
     "allowed)\n Remember that this is not the sign-up form yet, that will be posted when voting ends, every Wednesday.",
@@ -142,7 +142,7 @@ ROLES_REACTIONS = [
 
 VOICE_REACTIONS = [":mute:", ":loud_sound:"]
 
-RAID_VOTE_RESULT = """**ACTIVITY VOTE: {}** @ever----yone
+RAID_VOTE_RESULT = """**ACTIVITY VOTE: {}** @everyone
 The Twilight Travelers ACTIVITY this week will be {}
  This is the official sign-up form, so please react with the specified emoji below this post.
 
@@ -158,7 +158,7 @@ __**When:**__  The farm will commence on {} at 18:00ST - 20:00ST (servertime).
 __**Info:**__  Be sure to unlock all the required duties.
 __**Raid Leader:**__ <@{}>"""
 
-SIGNUP_RESULT = """**Signup results (to dm?)**
+SIGNUP_RESULT = """**Signup results**
 
 {}
 """

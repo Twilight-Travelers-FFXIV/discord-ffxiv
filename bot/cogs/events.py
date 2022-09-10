@@ -32,7 +32,7 @@ def dc_emojize(emoji_text: str):
     return emoji.emojize(emoji_text, use_aliases=True)
 
 
-def dc_timestamp(day: str, hours=17, minutes=00):
+def dc_timestamp(day: str, hours=18, minutes=00):
     days = {name: i for i, name in enumerate(day_name)}
     today = date.today()
     weekday = today.weekday()
