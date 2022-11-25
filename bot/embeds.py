@@ -78,7 +78,7 @@ raid_activity_poll = {
                 {
                     "name": "**__ARR/HW/SB/SHB FARMS <:ffxivintrial:973233132415385710>__**",
                     "value": _embed_activity(
-                        [[":racehorse:", ":bird:"], [":wolf:", ":dragon_face:"]]
+                        [[":wolf:", ":dragon_face:"]]
                     ),
                 },
                 {
@@ -101,13 +101,7 @@ raid_activity_poll = {
                 {
                     "name": "**__RAIDS <:ffxivinraids:973233131639423037>__**",
                     "value": _embed_activity(
-                        [[":ladder:", ":office:"], [":trackball:", ":earth_americas:"]]
-                    ),
-                },
-                {
-                    "name": "**__SAVAGE/ULTIMATE/UNREAL CONTENT <:ffxivinhighendraids:973233131828154378>__**",
-                    "value": _embed_activity(
-                        [[":volcano:", ":ringed_planet:"], [":imp:", ":dvd:"]]
+                        [[":trackball:", ":earth_americas:"]]
                     ),
                 },
                 {
@@ -117,10 +111,6 @@ raid_activity_poll = {
                             [
                                 "<:ffxivmapfate:975863641402400788>",
                                 "<:ffxivmapbluemage:973233132079816724>",
-                            ],
-                            [
-                                "<:ffxivinhunts:973233132188868698>",
-                                "<:ffxivmissionicon:973233132130140170>",
                             ],
                             [
                                 "<:ffxivintreasurehunt:973233132063035482>",
