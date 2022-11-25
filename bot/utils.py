@@ -1,4 +1,6 @@
 """Misc Utility functions"""
+
+import contextlib
 import functools
 
 
@@ -9,12 +11,10 @@ def delete_caller(f):
     async def wrapper(*args, **kwargs):
         """Function wrapped"""
         return_value = await f(*args, **kwargs)
-        try:
-            await args[1].message.delete()
-        except AttributeError:  # Not a context
-            pass
-        except IndexError:  # Not a bot command. Fail open.
-            pass
+        ctx = args[1]
+        with contextlib.suppress(AttributeError, IndexError):
+            if not ctx.interaction_type:
+                await ctx.message.delete()
         return return_value
 
     return wrapper

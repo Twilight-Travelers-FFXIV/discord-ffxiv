@@ -24,15 +24,15 @@ logger = logging.getLogger(__name__)
 
 BLOCK_LIST = "space|ffxivintrial|ffxivinraids|ffxivinhighendraids|ffxivstoryicon|hand"
 
-
 def dc_emojize(emoji_text: str):
     """Turn :string: emojis into Unicode (or valid discord emoji)"""
     if "<" in emoji_text:
         return emoji_text
-    return emoji.emojize(emoji_text, use_aliases=True)
+    return emoji.emojize(emoji_text, language='alias')
 
 
-def dc_timestamp(day: str, hours=18, minutes=00):
+def dc_timestamp(day: str, hours: int = 18, minutes: int = 00) -> float:
+    """Convert day and time of the week to actual timestamp."""
     days = {name: i for i, name in enumerate(day_name)}
     today = date.today()
     weekday = today.weekday()
@@ -45,7 +45,7 @@ def dc_demojize(emoji_rendered: str):
     """Turn Unicode emojis back into :string: format (or valid custom discord emoji string)"""
     if isinstance(
         emoji_rendered, Emoji
-    ):  # TODO: what about foreign emotes from other servers??
+    ):
         return str(emoji_rendered)
     return emoji.demojize(emoji_rendered, language="alias")
 
@@ -55,7 +55,8 @@ class Events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.emoji_re = re.compile(f"<:(?!{BLOCK_LIST})\w+:\d+\>|:(?!{BLOCK_LIST})\w+:")
+        self.emoji_re = re.compile(fr"<:(?!{BLOCK_LIST})\w+:\d+\>|:(?!{BLOCK_LIST})\w+:")
+        super().__init__()
 
     @staticmethod
     async def _emoji_reactions(msg, emojis: list):
@@ -69,9 +70,9 @@ class Events(commands.Cog):
             logging.debug("Adding Reaction: %s", emoji_reaction)
             await msg.add_reaction(dc_emojize(emoji_reaction))
 
-    @commands.command()
+    @commands.hybrid_command(name="events")
     @delete_caller
-    async def events(self, ctx, event_type="raids"):
+    async def events(self, ctx: commands.Context, event_type: str = "raids") -> None:
         """Push out event planning message of according type.
 
         Args:
@@ -102,9 +103,9 @@ class Events(commands.Cog):
         msg = await ctx.send(final_text)
         await self._emoji_reactions(msg, [self.emoji_re.findall(final_text)])
 
-    @commands.command()
+    @commands.hybrid_command(name="event_results")
     @delete_caller
-    async def event_results(self, ctx):
+    async def event_results(self, ctx: commands.Context) -> None:
         """Fetch results of most recent event
 
         Args:
@@ -153,10 +154,13 @@ class Events(commands.Cog):
             [ROLES_REACTIONS, VOICE_REACTIONS],
         )
 
-    @commands.command()
+    @commands.hybrid_command(name="signup_results")
     @delete_caller
-    async def signup_results(self, ctx):
+    async def signup_results(self, ctx: commands.Context) -> None:
         """Fetch sign up of most recent event result announcement."""
+        if ctx.interaction:  # THIS TAKES LONGER !! Defer response
+            print("Paniku! Deferring")
+            await ctx.interaction.response.defer()
         async for message in ctx.channel.history(limit=50):
             if (
                 message.author == self.bot.user
@@ -187,7 +191,7 @@ class Events(commands.Cog):
         role_to_user_reacts = defaultdict(list)
         user_to_voice_reacts = {}
         for r in signup_message.reactions:
-            flat_user_list = await r.users().flatten()
+            flat_user_list = [user async for user in r.users()]
             for user in flat_user_list:
                 if user == self.bot.user:
                     continue
@@ -211,10 +215,12 @@ class Events(commands.Cog):
             ]
             return "\n - ".join(users)
 
-        msg = await ctx.send(
-            SIGNUP_RESULT.format(
+        msg =  SIGNUP_RESULT.format(
                 "\n\n".join(
                     [f"{role}: \n - {_userformat(role)}" for role in ROLES_REACTIONS]
                 )
             )
-        )
+        if ctx.interaction:  # THIS TAKES LONGER !! Defer response
+            await ctx.interaction.followup.send(msg)
+        else:
+            await ctx.send(msg)
