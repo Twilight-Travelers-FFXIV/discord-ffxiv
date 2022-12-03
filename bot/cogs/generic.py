@@ -1,12 +1,34 @@
 """Generic Commands"""
 import re
 import time
+from typing import Optional, Literal
 
-from discord import Emoji, Embed, Color
+import discord
+from discord import Emoji, Embed, Color, app_commands
 from discord.ext import commands
+from discord.ext.commands import Context
+
 from ..config import prefix
 
-from ..utils import delete_caller
+
+class GenericSlash(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @app_commands.command(name="timed-ping")
+    async def timed_ping(self, interaction: discord.Interaction) -> None:
+        """Ping that returns current timestamp. Useful for debugging.
+
+        Args:
+            interaction (Interaction): Passed automatically by discord.py
+        """
+        await interaction.response.send_message(
+            f"Timed Ping! Sent at <t:{int(time.time())}:T>"
+        )
+
+    @commands.hybrid_command(name="interaction_type")
+    async def interaction_type(self, ctx) -> None:
+        await ctx.send(f"Interaction: {ctx.interaction}")
 
 
 class Generic(commands.Cog):
@@ -15,7 +37,7 @@ class Generic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.hybrid_command(name="ping")
     async def ping(self, ctx):
         """Simple back and forth message. Useful for confirming that the bot is alive, and what latency it has.
 
@@ -25,14 +47,10 @@ class Generic(commands.Cog):
         await ctx.send(f"Pong! Latency: {round(self.bot.latency * 1000)}ms")
 
     @commands.command()
-    @delete_caller
-    async def timed_ping(self, ctx):
-        """Ping that returns current timestamp. Useful for debugging.
-
-        Args:
-            ctx (Context): Passed automatically by discord.py
-        """
-        await ctx.send(f"Timed Ping! Sent at <t:{int(time.time())}:T>")
+    async def sync_tree(self, ctx):
+        guild = ctx.guild
+        self.bot.tree.copy_global_to(guild=guild)
+        await ctx.send(f"Synced cmd tree to {guild}.")
 
     @commands.command()
     async def emoji_debug(self, ctx, emoji: Emoji):
@@ -112,3 +130,23 @@ class Generic(commands.Cog):
 
         emb.set_footer(text="Please shout at Lem or Countii if things are broken.")
         await ctx.send(embed=emb)
+
+    @commands.command()
+    async def sync(
+        self, ctx: Context, spec: Optional[Literal["~", "*", "^"]] = None
+    ) -> None:
+        if spec == "~":
+            synced = await ctx.bot.tree.sync(guild=ctx.guild)
+        elif spec == "*":
+            ctx.bot.tree.copy_global_to(guild=ctx.guild)
+            synced = await ctx.bot.tree.sync(guild=ctx.guild)
+        elif spec == "^":
+            ctx.bot.tree.clear_commands(guild=ctx.guild)
+            await ctx.bot.tree.sync(guild=ctx.guild)
+            synced = []
+        else:
+            synced = await ctx.bot.tree.sync()
+        await ctx.send(
+            f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+        )
+        return

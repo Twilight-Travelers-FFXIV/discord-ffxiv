@@ -1,8 +1,10 @@
 """Main script that should be executed to start bot execution"""
+import asyncio
 import logging
 import sys
 
 import discord
+from discord import Intents, AllowedMentions
 from discord.ext import commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -13,9 +15,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger("Main")
 
 
-intents = discord.Intents.default()
+intents: Intents = Intents.default()
+intents.message_content = True
 discord_bot = commands.Bot(
-    intents=intents, command_prefix=bot.config.prefix(), help_command=None
+    intents=intents, command_prefix=bot.config.prefix(), help_command=None, allowed_mentions=AllowedMentions(everyone = True)
 )
 
 # Scheduling Stuff
@@ -23,7 +26,7 @@ SCHEDULER = None
 
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
-    "events": CronTrigger(day_of_week="sun", hour="21", minute="00", second="0"),
+    "events": CronTrigger(day_of_week="sun", hour="21", minute="20", second="0"),
     "event_results": CronTrigger(day_of_week="wed", hour="18", minute="00", second="0"),
 }
 
@@ -52,7 +55,7 @@ async def on_ready():
 
     # Now, register all cogs:
     for cog in bot.enabled_cogs:
-        discord_bot.add_cog(cog(discord_bot))
+        await discord_bot.add_cog(cog(discord_bot))
     logger.info("\nPrefix: '%s'", bot.config.prefix())
     available_cogs = [
         c.name
@@ -74,8 +77,8 @@ async def on_ready():
 
     await channel.send(
         f"The following scheduled messages are set up for this channel: \n{formatted_schedule}\n"
-        f"_This message will self-destruct in 1 minute._",
-        delete_after=60.0,
+        f"_This message will self-destruct in 10 seconds._",
+        delete_after=10.0,
     )
     logger.info("Scheduler initiated!")
 
@@ -88,17 +91,26 @@ async def on_connect():
         SCHEDULER.add_job(schedule_command(message), schedule, name=message)
 
 
-@discord_bot.event
-async def on_disconnect():
+async def __unused_on_disconnect():
     """Called when the client has disconnected from Discord."""
     logger.debug("Disconnected from Discord! Flushing jobs...")
     for job in SCHEDULER.get_jobs():
         job.remove()
+        pass
 
+
+async def main():
+    """Entry function, wrap in extra asyn and ensure cmd tree is always synced!"""
+    async with discord_bot:
+        discord_bot.tree.copy_global_to(guild=discord.Object(id=926637968381329459))
+        await discord_bot.start(bot.config.bot_token())
+    # discord_bot.run(bot.config.bot_token())
 
 if __name__ == "__main__":
     logger.info("Initializing scheduler...")
     SCHEDULER = AsyncIOScheduler()
 
     logger.info("Running Bot...")
-    discord_bot.run(bot.config.bot_token())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+
