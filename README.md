@@ -1,4 +1,4 @@
-# discord-ffxiv
+# Tataru Taru
 
 ## Description
 This is intended for Twilight Travelers FC for FFXIV.
