@@ -12,6 +12,7 @@ from ..config import prefix
 
 
 class GenericSlash(commands.Cog):
+    """Generic App Commands mostly for troubleshooting."""
     def __init__(self, bot):
         self.bot = bot
 
@@ -28,6 +29,7 @@ class GenericSlash(commands.Cog):
 
     @commands.hybrid_command(name="interaction_type")
     async def interaction_type(self, ctx) -> None:
+        """Show the tye of interaction, if any. For debugging."""
         await ctx.send(f"Interaction: {ctx.interaction}")
 
 
@@ -39,7 +41,8 @@ class Generic(commands.Cog):
 
     @commands.hybrid_command(name="ping")
     async def ping(self, ctx):
-        """Simple back and forth message. Useful for confirming that the bot is alive, and what latency it has.
+        """Simple back and forth message.
+        Useful for confirming that the bot is alive, and what latency it has.
 
         Args:
             ctx (Context): Passed automatically by discord.py
@@ -48,6 +51,7 @@ class Generic(commands.Cog):
 
     @commands.command()
     async def sync_tree(self, ctx):
+        """Sync the tree to the current guild. Needed to force app commands."""
         guild = ctx.guild
         self.bot.tree.copy_global_to(guild=guild)
         await ctx.send(f"Synced cmd tree to {guild}.")
@@ -82,9 +86,9 @@ class Generic(commands.Cog):
                 f"for the module and its commands.",
             )
 
-            cogs_desc = ""
-            for cog in self.bot.cogs:
-                cogs_desc += f"`{cog}` {self.bot.cogs[cog].__doc__}\n"
+            cogs_desc = "".join(
+                f"`{cog}` {self.bot.cogs[cog].__doc__}\n" for cog in self.bot.cogs
+            )
 
             emb.add_field(name="Modules", value=cogs_desc, inline=False)
 
@@ -100,7 +104,9 @@ class Generic(commands.Cog):
                     )
 
                     # Regex to find ctx docstring
-                    ctx_regex = re.compile(r"^\s*ctx \(.*$", re.IGNORECASE)
+                    ctx_regex = re.compile(
+                        r"^\s*ctx \(.*$", re.IGNORECASE | re.MULTILINE
+                    )
 
                     for command in self.bot.get_cog(cog).get_commands():
                         if not command.hidden:
@@ -109,7 +115,7 @@ class Generic(commands.Cog):
                             )
                             emb.add_field(
                                 name=f"`{prefix()}{command.name}`",
-                                value=str(ctx_regex.sub(help_text, " ")),
+                                value=str(ctx_regex.sub("", help_text)),
                                 inline=False,
                             )
                     break  # can break as we found the correct cog :)
@@ -135,6 +141,11 @@ class Generic(commands.Cog):
     async def sync(
         self, ctx: Context, spec: Optional[Literal["~", "*", "^"]] = None
     ) -> None:
+        """Sync based on content
+
+        Args:
+            spec (str): none for global, "~" local, "*" copy global to local, "^" force clear
+        """
         if spec == "~":
             synced = await ctx.bot.tree.sync(guild=ctx.guild)
         elif spec == "*":
@@ -147,6 +158,6 @@ class Generic(commands.Cog):
         else:
             synced = await ctx.bot.tree.sync()
         await ctx.send(
-            f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+            f"Synced {len(synced)} commands."
         )
         return
