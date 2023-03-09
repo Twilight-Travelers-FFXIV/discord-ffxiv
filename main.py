@@ -18,7 +18,10 @@ logger = logging.getLogger("Main")
 intents: Intents = Intents.default()
 intents.message_content = True
 discord_bot = commands.Bot(
-    intents=intents, command_prefix=bot.config.prefix(), help_command=None, allowed_mentions=AllowedMentions(everyone = True)
+    intents=intents,
+    command_prefix=bot.config.prefix(),
+    help_command=None,
+    allowed_mentions=AllowedMentions(everyone=True),
 )
 
 # Scheduling Stuff
@@ -26,8 +29,12 @@ SCHEDULER = None
 
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
-    "events": CronTrigger(day_of_week="sun", hour="21", minute="20", second="0"),
-    "event_results": CronTrigger(day_of_week="wed", hour="18", minute="00", second="0"),
+    "events": CronTrigger(
+        week="*/2", day_of_week="sun", hour="21", minute="20", second="0"
+    ),
+    "event_results": CronTrigger(
+        week="*/2", day_of_week="wed", hour="18", minute="00", second="0"
+    ),
 }
 
 
@@ -106,6 +113,7 @@ async def main():
         await discord_bot.start(bot.config.bot_token())
     # discord_bot.run(bot.config.bot_token())
 
+
 if __name__ == "__main__":
     logger.info("Initializing scheduler...")
     SCHEDULER = AsyncIOScheduler()
@@ -113,4 +121,3 @@ if __name__ == "__main__":
     logger.info("Running Bot...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-
