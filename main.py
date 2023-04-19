@@ -16,7 +16,7 @@ logger = logging.getLogger("Main")
 
 
 intents: Intents = Intents.default()
-intents.message_content = True
+intents.message_content = True  # pylint: disable=assigning-non-slot
 discord_bot = commands.Bot(
     intents=intents,
     command_prefix=bot.config.prefix(),
@@ -30,10 +30,20 @@ SCHEDULER = None
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
     "events": CronTrigger(
-        week="*/2", day_of_week="sun", hour="21", minute="20", second="0", timezone="UTC"
+        week="*/2",
+        day_of_week="sun",
+        hour="21",
+        minute="20",
+        second="0",
+        timezone="UTC",
     ),
     "event_results": CronTrigger(
-        week="*/2", day_of_week="wed", hour="18", minute="00", second="0", timezone="UTC"
+        week="*/2",
+        day_of_week="wed",
+        hour="18",
+        minute="00",
+        second="0",
+        timezone="UTC",
     ),
 }
 

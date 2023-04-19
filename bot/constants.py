@@ -1,3 +1,4 @@
+"""Constants used in other files"""
 DATA_WORLDS = [
     "Adamantoise",
     "Aegis",

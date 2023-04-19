@@ -13,6 +13,7 @@ from ..config import prefix
 
 class GenericSlash(commands.Cog):
     """Generic App Commands mostly for troubleshooting."""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -157,7 +158,5 @@ class Generic(commands.Cog):
             synced = []
         else:
             synced = await ctx.bot.tree.sync()
-        await ctx.send(
-            f"Synced {len(synced)} commands."
-        )
+        await ctx.send(f"Synced {len(synced)} commands.")
         return

@@ -1,5 +1,5 @@
 """Embed Definitions"""
-
+# pylint: disable=line-too-long
 
 # Helper function to generate embeds
 from typing import List
@@ -9,7 +9,8 @@ def _embed_activity(activities: List[List[str]]):
     """Flattens out activity list to formatted embed value
 
     Args:
-        activities (List[List[str]]): First level list is rows, second level is activities by emoji shortcut.
+        activities (List[List[str]]): First level list is rows,
+                                      second level is activities by emoji shortcut.
 
     Returns:
         Expanded activity ready for use as embedding value.
@@ -77,9 +78,7 @@ raid_activity_poll = {
             "fields": [
                 {
                     "name": "**__ARR/HW/SB/SHB FARMS <:ffxivintrial:973233132415385710>__**",
-                    "value": _embed_activity(
-                        [[":wolf:", ":dragon_face:"]]
-                    ),
+                    "value": _embed_activity([[":wolf:", ":dragon_face:"]]),
                 },
                 {
                     "name": "**__ENDWALKER FARMS (lvl90) :milky_way:__**",
@@ -100,9 +99,7 @@ raid_activity_poll = {
             "fields": [
                 {
                     "name": "**__RAIDS <:ffxivinraids:973233131639423037>__**",
-                    "value": _embed_activity(
-                        [[":trackball:", ":earth_americas:"]]
-                    ),
+                    "value": _embed_activity([[":trackball:", ":earth_americas:"]]),
                 },
                 {
                     "name": "**__EXTRA'S <:ffxivstoryicon:975863482429898803>__**",

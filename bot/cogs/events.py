@@ -24,11 +24,12 @@ logger = logging.getLogger(__name__)
 
 BLOCK_LIST = "space|ffxivintrial|ffxivinraids|ffxivinhighendraids|ffxivstoryicon|hand"
 
+
 def dc_emojize(emoji_text: str):
     """Turn :string: emojis into Unicode (or valid discord emoji)"""
     if "<" in emoji_text:
         return emoji_text
-    return emoji.emojize(emoji_text, language='alias')
+    return emoji.emojize(emoji_text, language="alias")
 
 
 def dc_timestamp(day: str, hours: int = 18, minutes: int = 00) -> float:
@@ -43,9 +44,7 @@ def dc_timestamp(day: str, hours: int = 18, minutes: int = 00) -> float:
 
 def dc_demojize(emoji_rendered: str):
     """Turn Unicode emojis back into :string: format (or valid custom discord emoji string)"""
-    if isinstance(
-        emoji_rendered, Emoji
-    ):
+    if isinstance(emoji_rendered, Emoji):
         return str(emoji_rendered)
     return emoji.demojize(emoji_rendered, language="alias")
 
@@ -55,7 +54,9 @@ class Events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.emoji_re = re.compile(fr"<:(?!{BLOCK_LIST})\w+:\d+\>|:(?!{BLOCK_LIST})\w+:")
+        self.emoji_re = re.compile(
+            fr"<:(?!{BLOCK_LIST})\w+:\d+\>|:(?!{BLOCK_LIST})\w+:"
+        )
         super().__init__()
 
     @staticmethod
@@ -122,16 +123,16 @@ class Events(commands.Cog):
         # get max emoji helper to
         def _max_emoji(messages):
             return max(
-                [
+                (
                     (dc_demojize(r.emoji), r.count)
                     for m in messages
                     for r in m.reactions
-                ],
+                ),
                 key=lambda tup: tup[1],
             )
 
         # 0th message from the bottom should be the date vote:
-        winning_day = _max_emoji(messages_to_check[0:1])
+        winning_day = _max_emoji(messages_to_check[:1])
         if not winning_day or winning_day[0] not in day_map.keys():
             await ctx.send(":warning: No valid previous event vote found.")
             return
@@ -185,19 +186,19 @@ class Events(commands.Cog):
         if not winning_day:
             await ctx.send(":warning: No valid previous event result day found.")
             return
-        winning_day = winning_day.group("name")
+        winning_day = winning_day["name"]
 
         # Convert to lookups for reporting
         role_to_user_reacts = defaultdict(list)
         user_to_voice_reacts = {}
-        for r in signup_message.reactions:
-            flat_user_list = [user async for user in r.users()]
+        for reaction in signup_message.reactions:
+            flat_user_list = [user async for user in reaction.users()]
             for user in flat_user_list:
                 if user == self.bot.user:
                     continue
-                emote = dc_demojize(r.emoji)
+                emote = dc_demojize(reaction.emoji)
                 if emote in ROLES_REACTIONS:
-                    role_to_user_reacts[dc_demojize(r.emoji)].append(user)
+                    role_to_user_reacts[dc_demojize(reaction.emoji)].append(user)
                 if emote in VOICE_REACTIONS:
                     if user not in user_to_voice_reacts.keys():
                         user_to_voice_reacts[user] = emote
@@ -215,11 +216,11 @@ class Events(commands.Cog):
             ]
             return "\n - ".join(users)
 
-        msg =  SIGNUP_RESULT.format(
-                "\n\n".join(
-                    [f"{role}: \n - {_userformat(role)}" for role in ROLES_REACTIONS]
-                )
+        msg = SIGNUP_RESULT.format(
+            "\n\n".join(
+                [f"{role}: \n - {_userformat(role)}" for role in ROLES_REACTIONS]
             )
+        )
         if ctx.interaction:  # THIS TAKES LONGER !! Defer response
             await ctx.interaction.followup.send(msg)
         else:
