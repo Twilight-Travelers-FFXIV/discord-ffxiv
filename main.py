@@ -30,10 +30,10 @@ SCHEDULER = None
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
     "events": CronTrigger(
-        week="*/2", day_of_week="sun", hour="21", minute="20", second="0"
+        week="*/2", day_of_week="sun", hour="21", minute="20", second="0", timezone="UTC"
     ),
     "event_results": CronTrigger(
-        week="*/2", day_of_week="wed", hour="18", minute="00", second="0"
+        week="*/2", day_of_week="wed", hour="18", minute="00", second="0", timezone="UTC"
     ),
 }
 
@@ -93,9 +93,10 @@ async def on_ready():
 @discord_bot.event
 async def on_connect():
     """Called when the client has successfully connected to Discord."""
-    logger.debug("Adding Scheduled Functions...")
-    for message, schedule in scheduled_commands.items():
-        SCHEDULER.add_job(schedule_command(message), schedule, name=message)
+    if not SCHEDULER.get_jobs():
+        logger.debug("Adding Scheduled Functions...")
+        for message, schedule in scheduled_commands.items():
+            SCHEDULER.add_job(schedule_command(message), schedule, name=message)
 
 
 async def __unused_on_disconnect():
@@ -103,7 +104,6 @@ async def __unused_on_disconnect():
     logger.debug("Disconnected from Discord! Flushing jobs...")
     for job in SCHEDULER.get_jobs():
         job.remove()
-        pass
 
 
 async def main():
