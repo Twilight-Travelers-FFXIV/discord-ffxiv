@@ -64,11 +64,10 @@ raid_activity_poll = {
     "<:ffxivautoright:973233131849130004> <:fffxivmapfight:973233131480035389> @everyone\n"
     "This VOTE is open for all our FC-members to choose their preference for the next FC-Raid/Trial activity.\n"
     "You can vote for your desired activity by clicking on one of the below emoji's to vote. (multiple voting is "
-    "allowed)\n Remember that this is not the sign-up form yet, that will be posted when voting ends, every Wednesday.",
-    "after_embed": "<:hand:973233132369215568>**The FC's activity will be held on Friday, Saturday or Sunday. For now, "
-    "we will only organize one activity a week. This can be upscaled to 2 per week if we see that there "
-    "is a lot of interest in FC activities.**\n\n Please specify your preferred day: \n:red_square: Friday, "
-    "\n:yellow_square: Saturday, \n:white_large_square: Sunday",
+    "allowed)\n Remember that this is not the sign-up form yet, that will be posted when voting ends on Wednesday.",
+    "after_embed": "<:hand:973233132369215568>**The FC's activity will be held on Friday, Saturday or Sunday.**"
+    "\n\nPlease specify your preferred day: \n:red_square: Friday, \n:yellow_square: Saturday, "
+    "\n:white_large_square: Sunday",
     "embeds": [
         {
             "color": 1752220,
