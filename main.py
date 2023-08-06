@@ -35,7 +35,7 @@ scheduled_commands = {
         hour="21",
         minute="20",
         second="0",
-        timezone="UTC",
+        timezone="Europe/London",
     ),
     "event_results": CronTrigger(
         week="2-53/2",
@@ -43,7 +43,7 @@ scheduled_commands = {
         hour="18",
         minute="00",
         second="0",
-        timezone="UTC",
+        timezone="Europe/London",
     ),
 }
 
