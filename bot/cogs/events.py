@@ -214,7 +214,7 @@ class Events(commands.Cog):
                 user_to_voice_reacts.get(u, ":question:") + u.mention
                 for u in role_to_user_reacts[role]
             ]
-            return "\n - ".join#(users)
+            return "\n - ".join(users)
 
         msg = SIGNUP_RESULT.format(
             "\n\n".join(
