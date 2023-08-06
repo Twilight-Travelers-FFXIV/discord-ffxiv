@@ -27,4 +27,4 @@ def xivapi_token():
 
 def schedule_channel():
     """Channel ID for scheduled commands, reverts to bot testing channel by default."""
-    return int(os.getenv("SCHEDULE_CHANNEL", "926638377011392573"))
+    return int(os.getenv("SCHEDULE_CHANNEL", "1132654623858098246#"))
