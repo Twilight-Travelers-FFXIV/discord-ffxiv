@@ -77,7 +77,9 @@ raid_activity_poll = {
             "fields": [
                 {
                     "name": "**__ARR/HW/SB/SHB FARMS <:ffxivintrial:973233132415385710>__**",
-                    "value": _embed_activity([[":wolf:", ":dragon_face:"]]),
+                    "value": _embed_activity(
+                        [[":racehorse:", ":bird:", ":wolf:", ":dragon_face:"]]
+                    ),
                 },
                 {
                     "name": "**__ENDWALKER FARMS (lvl90) :milky_way:__**",
@@ -121,9 +123,9 @@ raid_activity_poll = {
 }
 
 ROLES_REACTIONS = [
-    "<:ffxivRole_dps:926749125737844737>",
-    "<:ffxivRole_healer:926749125733679135>",
-    "<:ffxivRole_tank:926749126153084988>",
+    "<:DPSRole:1132801191483555860>",
+    "<:HealerRole:1132801193593290842>",
+    "<:TankRole:1132801194792857620>",
 ]
 
 VOICE_REACTIONS = [":mute:", ":loud_sound:"]
@@ -132,9 +134,9 @@ RAID_VOTE_RESULT = """**ACTIVITY VOTE: {}** @everyone
 The Twilight Travelers ACTIVITY this week will be {}
  This is the official sign-up form, so please react with the specified emoji below this post.
 
- <:ffxivRole_dps:926749125737844737> I will join as a DPS.
- <:ffxivRole_healer:926749125733679135> I will join as a Healer.
- <:ffxivRole_tank:926749126153084988> I will join as a Tank. 
+ <:DPSRole:1132801191483555860> I will join as a DPS.
+ <:HealerRole:1132801193593290842> I will join as a Healer.
+ <:TankRole:1132801194792857620> I will join as a Tank. 
  __(multiple voting is allowed)__ 
  
  If you want to join the voice chat for this event, please vote with :loud_sound:; If not, please react with :mute:.
