@@ -4,6 +4,7 @@ from collections import defaultdict
 import logging
 import re
 from datetime import date, timedelta, datetime, time
+from apscheduler.triggers.date import DateTrigger
 
 import emoji
 from discord import Embed, Emoji
@@ -18,9 +19,13 @@ from ..embeds import (
     ROLES_REACTIONS,
     VOICE_REACTIONS,
 )
-from ..utils import flatten, delete_caller
+from ..utils import flatten, delete_caller, schedule_command
+from ..scheduler import TataruScheduler
+from ..tatarubot import TataruBot
 
 logger = logging.getLogger(__name__)
+scheduler = TataruScheduler()
+bot = TataruBot()
 
 BLOCK_LIST = "space|ffxivintrial|ffxivinraids|ffxivinhighendraids|ffxivstoryicon|hand"
 
@@ -137,7 +142,7 @@ class Events(commands.Cog):
             await ctx.send(":warning: No valid previous event vote found.")
             return
 
-        # from then, the erst are vote votes
+        # from then, the rest are vote votes
         winning_event = _max_emoji(messages_to_check[1:])
         winning_event_name = emoji_activity_map.get(winning_event[0])
         timestamp = int(dc_timestamp(day_map.get(winning_day[0])))
@@ -153,6 +158,13 @@ class Events(commands.Cog):
         await self._emoji_reactions(
             msg,
             [ROLES_REACTIONS, VOICE_REACTIONS],
+        )
+
+        # finally, add a reminder 1 hour before
+        scheduler.add_job(
+            schedule_command(bot, "signup_results"),
+            DateTrigger(datetime.fromtimestamp(timestamp - 3600)),
+            name="signup_results",
         )
 
     @commands.hybrid_command(name="signup_results")
@@ -217,9 +229,7 @@ class Events(commands.Cog):
             return "\n - ".join(users)
 
         msg = SIGNUP_RESULT.format(
-            "\n\n".join(
-                [f"{role}: \n - {_userformat(role)}" for role in ROLES_REACTIONS]
-            )
+            "\n\n".join([f"{role}: \n{_userformat(role)}" for role in ROLES_REACTIONS])
         )
         if ctx.interaction:  # THIS TAKES LONGER !! Defer response
             await ctx.interaction.followup.send(msg)

@@ -37,7 +37,7 @@ emoji_activity_map = {
     "<:Purplecrystal:973233130758606848>": "||The Dark Inside EX||",
     ":crystal_ball:": "||The Mothercrystal EX||",
     ":satellite:": "||The Final Day EX||",
-    ":ladder:": "Binding coils of Bahamut (lvl50)",
+    ":ladder:": "Binding coils of Bahamut (Unsynced)",
     ":office:": "Alexander Raid (lvl60)",
     ":trackball:": "Omega Raid (lvl70)",
     ":earth_americas:": "Eden Raid (lvl80)",
@@ -100,7 +100,9 @@ raid_activity_poll = {
             "fields": [
                 {
                     "name": "**__RAIDS <:ffxivinraids:973233131639423037>__**",
-                    "value": _embed_activity([[":trackball:", ":earth_americas:"]]),
+                    "value": _embed_activity(
+                        [[":ladder:", ":trackball:", ":earth_americas:"]]
+                    ),
                 },
                 {
                     "name": "**__EXTRA'S <:ffxivstoryicon:975863482429898803>__**",
@@ -126,6 +128,7 @@ ROLES_REACTIONS = [
     "<:DPSRole:1132801191483555860>",
     "<:HealerRole:1132801193593290842>",
     "<:TankRole:1132801194792857620>",
+    "<:AllRounder:1139665113410965604>",
 ]
 
 VOICE_REACTIONS = [":mute:", ":loud_sound:"]
@@ -146,7 +149,8 @@ __**When:**__  The farm will commence on {} at 18:00ST - 20:00ST (servertime).
 __**Info:**__  Be sure to unlock all the required duties.
 __**Raid Leader:**__ <@{}>"""
 
-SIGNUP_RESULT = """**Signup results**
+SIGNUP_RESULT = """**Signup Reminder**
+The raid voted on above starts in 1 hour - Here are the signups:
 
 {}
 """

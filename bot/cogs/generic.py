@@ -8,7 +8,11 @@ from discord import Emoji, Embed, Color, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
+from ..utils import delete_caller
 from ..config import prefix
+from ..scheduler import TataruScheduler
+
+scheduler = TataruScheduler()
 
 
 class GenericSlash(commands.Cog):
@@ -137,6 +141,27 @@ class Generic(commands.Cog):
 
         emb.set_footer(text="Please shout at Lem or Countii if things are broken.")
         await ctx.send(embed=emb)
+
+    @commands.command()
+    @delete_caller
+    async def get_scheduled(self, ctx):
+        """Pring out all of the currently scheduled mesages
+
+        Args:
+            ctx (Context): Passed automatically by discord.py
+        """
+        formatted_schedule = "\n\n".join(
+            [
+                f"{job.name} :arrow_right:  {job.trigger}\nNext: {job.next_run_time}\n"
+                for job in scheduler.get_jobs()
+            ]
+        )
+
+        await ctx.channel.send(
+            f"The following scheduled messages are set up for this channel: \n{formatted_schedule}\n"
+            f"_This message will self-destruct in 10 seconds._",
+            delete_after=10.0,
+        )
 
     @commands.command()
     async def sync(

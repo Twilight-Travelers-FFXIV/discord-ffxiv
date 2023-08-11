@@ -4,25 +4,13 @@ import logging
 import sys
 
 import discord
-from discord import Intents, AllowedMentions
-from discord.ext import commands
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 import bot
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger("Main")
-
-
-intents: Intents = Intents.default()
-intents.message_content = True  # pylint: disable=assigning-non-slot
-discord_bot = commands.Bot(
-    intents=intents,
-    command_prefix=bot.config.prefix(),
-    help_command=None,
-    allowed_mentions=AllowedMentions(everyone=True),
-)
+discord_bot = bot.TataruBot()
 
 # Scheduling Stuff
 SCHEDULER = None
@@ -46,23 +34,6 @@ scheduled_commands = {
         timezone="Europe/London",
     ),
 }
-
-
-def schedule_command(command):
-    """Higher-order function wrapper that creates a callable function for a bot command
-
-    Args:
-        command (str): name of the command
-    """
-
-    async def func():
-        """The actual function that's called by the apscheduler"""
-        channel = discord_bot.get_channel(bot.config.schedule_channel())
-        message = await channel.send(f"!{command}")
-        ctx = await discord_bot.get_context(message)
-        await ctx.invoke(discord_bot.get_command(command))
-
-    return func
 
 
 @discord_bot.event
@@ -106,7 +77,9 @@ async def on_connect():
     if not SCHEDULER.get_jobs():
         logger.debug("Adding Scheduled Functions...")
         for message, schedule in scheduled_commands.items():
-            SCHEDULER.add_job(schedule_command(message), schedule, name=message)
+            SCHEDULER.add_job(
+                bot.utils.schedule_command(discord_bot, message), schedule, name=message
+            )
 
 
 async def __unused_on_disconnect():
@@ -126,7 +99,7 @@ async def main():
 
 if __name__ == "__main__":
     logger.info("Initializing scheduler...")
-    SCHEDULER = AsyncIOScheduler()
+    SCHEDULER = bot.scheduler.TataruScheduler()
 
     logger.info("Running Bot...")
     loop = asyncio.get_event_loop()
