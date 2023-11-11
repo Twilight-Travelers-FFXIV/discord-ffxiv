@@ -18,7 +18,7 @@ SCHEDULER = None
 # Scheduled commands with their respective triggers can be set here:
 scheduled_commands = {
     "events": CronTrigger(
-        week="1-53/2",
+        week="1-53/1",
         day_of_week="sun",
         hour="21",
         minute="20",
@@ -26,7 +26,7 @@ scheduled_commands = {
         timezone="Europe/London",
     ),
     "event_results": CronTrigger(
-        week="2-53/2",
+        week="2-53/1",
         day_of_week="wed",
         hour="18",
         minute="00",

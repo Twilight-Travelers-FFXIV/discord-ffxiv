@@ -37,7 +37,7 @@ def dc_emojize(emoji_text: str):
     return emoji.emojize(emoji_text, language="alias")
 
 
-def dc_timestamp(day: str, hours: int = 18, minutes: int = 00) -> float:
+def dc_timestamp(day: str, hours: int = 19, minutes: int = 00) -> float:
     """Convert day and time of the week to actual timestamp."""
     days = {name: i for i, name in enumerate(day_name)}
     today = date.today()
