@@ -1,4 +1,4 @@
-aiohttp==3.8.3
+aiohttp==3.9.0
 aiolimiter==1.0.0
 APScheduler==3.9.1.post1
 argcomplete==2.0.0
