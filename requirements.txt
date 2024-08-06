@@ -43,5 +43,5 @@ wcwidth==0.2.5
 wrapt==1.14.1
 yarl==1.8.1
 youtube-dl==2021.12.17
-setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
